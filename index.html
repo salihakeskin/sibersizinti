@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yalova Üniversitesi - İnteraktif Siber Lab</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
+        body { background-color: #020205; color: #00ff41; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        header { 
+            text-align: center; padding: 15px; background: #050d05; 
+            border: 1px solid #00ff41; border-radius: 5px; margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0,255,65,0.3);
+        }
+        header h1 { font-size: 16pt; color: #00ff41; text-shadow: 0 0 5px #00ff41; }
+        
+        .game-box { background: #000; border: 2px solid #333; border-radius: 8px; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+        
+        .mission-panel { background: #071407; border: 1px solid #00ff41; padding: 12px; margin-bottom: 15px; border-radius: 4px; }
+        .mission-title { font-weight: bold; color: #fff; margin-bottom: 5px; font-size: 11pt; color: #ff0055; }
+        .mission-desc { color: #a3ffa3; font-size: 9.5pt; line-height: 1.4; }
+        
+        .terminal-screen { 
+            background: #000; border: 1px solid #00ff41; height: 280px; 
+            overflow-y: auto; padding: 15px; font-size: 10pt; line-height: 1.5;
+            margin-bottom: 15px; border-radius: 4px; box-shadow: inset 0 0 10px rgba(0,255,65,0.5);
+        }
+        
+        /* Form Yapısı */
+        .input-form { display: flex; align-items: center; background: #050d05; padding: 10px; border: 1px solid #333; border-radius: 4px; }
+        .prompt { color: #ff0055; font-weight: bold; margin-right: 10px; user-select: none; }
+        .cmd-input { 
+            flex: 1; background: transparent; border: none; color: #fff; 
+            font-family: inherit; font-size: 11pt; outline: none; font-weight: bold;
+        }
+        
+        .hint-box { margin-top: 15px; font-size: 9.5pt; color: #888; text-align: center; }
+        .code-hint { color: #ffff00; font-weight: bold; background: #222; padding: 2px 6px; border-radius: 3px; }
+        
+        .success-text { color: #00ffff; font-weight: bold; }
+        .error-text { color: #ff3333; font-weight: bold; }
+        
+        .promo-footer { background: #050510; border: 1px solid #00d2ff; border-radius: 5px; padding: 15px; margin-top: 25px; text-align: center; }
+        .promo-footer h3 { color: #00d2ff; font-size: 12pt; margin-bottom: 5px; }
+        .promo-footer p { color: #ccc; font-size: 9pt; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Yalova Üniversitesi - Siber Sızma ve Ağ Güvenlik Simülatörü</h1>
+    </header>
+
+    <div class="game-box">
+        <div class="mission-panel">
+            <div class="mission-title" id="m-title">🔒 GÖREV 1: Kurumsal Ağ Altyapısını Tara (Ağ Keşfi)</div>
+            <div class="mission-desc" id="m-desc">Hedef şirketin sistemindeki açık portları bulmak için aşağıdaki satıra sızma testi komutunu yazın ve klavyeden Enter'a basın.</div>
+        </div>
+
+        <div class="terminal-screen" id="terminal">
+            <div class="success-text">[SİSTEM] Güvenli kabuk bağlantısı kuruldu. Yalova-CyberLab v1.0...</div>
+            <div>Etkileşimli siber sızma ve veritabanı analiz alanına hoş geldiniz.</div>
+            <div>-----------------------------------------------------------------</div>
+        </div>
+
+        <form class="input-form" onsubmit="processCommand(event)">
+            <span class="prompt">hacker@yalova-myo:~$</span>
+            <input type="text" class="cmd-input" id="cmd" autofocus autocomplete="off" placeholder="Komutu yazıp Enter'a basın...">
+        </form>
+    </div>
+
+    <div class="hint-box" id="hint-area">
+        💡 İpucu: İlk görevi tetiklemek için kutuya <span class="code-hint">nmap -sV</span> yazıp Enter'a basın.
+    </div>
+
+    <div class="promo-footer">
+        <h3>Siber Dünyanın Mimarı ve Koruyucusu Ol!</h3>
+        <p>Kurumsal Bilişim Uzmanlığı (Veritabanı ve Ağ Tasarımı) bölümünde, siber operasyonların arkasındaki gerçek dersleri profesyonel laboratuvarlarda öğrenirsiniz.</p>
+    </div>
+</div>
+
+<script>
+    const terminal = document.getElementById("terminal");
+    const cmdInput = document.getElementById("cmd");
+    const mTitle = document.getElementById("m-title");
+    const mDesc = document.getElementById("m-desc");
+    const hintArea = document.getElementById("hint-area");
+
+    let currentStep = 1;
+
+    // Herhangi bir yere tıklanınca input alanına otomatik odaklanır
+    document.body.addEventListener('click', () => { cmdInput.focus(); });
+
+    // Enter'a basıldığında tetiklenen kesin fonksiyon
+    function processCommand(event) {
+        event.preventDefault(); // Sayfanın post edilip yenilenmesini kesin olarak engeller
+        
+        let inputVal = cmdInput.value.trim();
+        cmdInput.value = "";
+        
+        if(inputVal === "") return;
+
+        // Yazılan komutu ekrana yansıt
+        terminal.innerHTML += `<div><span style="color:#ff0055">hacker@yalova-myo:~$</span> <span style="color:#fff">${inputVal}</span></div>`;
+        
+        const timeStr = new Date().toTimeString().split(' ')[0];
+
+        // 1. ADIM KONTROLÜ
+        if (currentStep === 1) {
+            if (inputVal === "nmap -sV") {
+                terminal.innerHTML += `<div class='success-text'>[${timeStr}] [NMAP] Hedef alt ağ taranıyor...</div>`;
+                terminal.innerHTML += `<div>PORT     STATE  SERVICE<br>80/tcp   open   http (Korumasız Ağ Altyapısı)<br>3306/tcp open   mysql (Açık Veritabanı Portu)</div>`;
+                terminal.innerHTML += `<div class='success-text'>[SİSTEM] GÖREV 1 BAŞARILI! Ağdaki SQL açığı saptandı.</div>`;
+                
+                currentStep = 2;
+                mTitle.innerText = "💾 GÖREV 2: SQL Injection ile Veritabanını Ele Geçir";
+                mDesc.innerText = "Keşfettiğiniz 3306 MySQL portu üzerinden kurumsal veri havuzuna sızmak için gerekli veritabanı sızma kodunu yazın.";
+                hintArea.innerHTML = `💡 İpucu: Veritabanını sorgulamak için <span class="code-hint">sqlmap --database</span> yazıp Enter'a basın.`;
+            } else {
+                terminal.innerHTML += `<div class='error-text'>[HATA] Geçersiz komut. Lütfen 'nmap -sV' yazın.</div>`;
+            }
+        } 
+        // 2. ADIM KONTROLÜ
+        else if (currentStep === 2) {
+            if (inputVal === "sqlmap --database") {
+                terminal.innerHTML += `<div class='success-text'>[${timeStr}] [SQLi] Hedef veritabanına enjeksiyon kodu gönderiliyor...</div>`;
+                terminal.innerHTML += `<div style='color:#00d2ff'>[SIZAN VERİ] ID: 01 | Ad: Saliha K. | Görev: Sistem Yöneticisi<br>[SIZAN VERİ] ID: 02 | Ad: Ahmet Y. | Görev: Ağ Güvenlik Uzmanı</div>`;
+                terminal.innerHTML += `<div class='success-text'>[SİSTEM] GÖREV 2 BAŞARILI! Kurumsal kritik veriler analiz edildi.</div>`;
+                
+                currentStep = 3;
+                mTitle.innerText = "🛡️ GÖREV 3: Güvenlik Duvarını (Firewall) Devreye Al";
+                mDesc.innerText = "Siber saldırıyı durdurmak ve kurumsal veri merkezini korumak için koruma komutunu çalıştırın.";
+                hintArea.innerHTML = `💡 İpucu: Saldırgan IP adresini engellemek için <span class="code-hint">firewall --block</span> yazıp Enter'a basın.`;
+            } else {
+                terminal.innerHTML += `<div class='error-text'>[SQL HATA] Enjeksiyon başarısız. Lütfen 'sqlmap --database' yazın.</div>`;
+            }
+        }
+        // 3. ADIM KONTROLÜ
+        else if (currentStep === 3) {
+            if (inputVal === "firewall --block") {
+                terminal.innerHTML += `<div class='success-text'>[${timeStr}] [FIREWALL] Kurallar güncellendi. Tehdit unsuru IP bloke edildi.</div>`;
+                terminal.innerHTML += `<div style='color:#ffff00'>[SİSTEM GÜVENLİ] Ağ tasarımı ve büyük veritabanı %100 koruma altına alındı.</div>`;
+                terminal.innerHTML += `<div class='success-text' style='font-size:12pt; text-shadow:0 0 5px;'>🏆 TEBRİKLER! TÜM OPERASYON BAŞARIYLA TAMAMLANDI.</div>`;
+                
+                mTitle.innerText = "🎉 TEBRİKLER, GELECEĞİN SİBER UZMANI SENSİN!";
+                mDesc.innerText = "Yalova Üniversitesi Çınarcık MYO Kurumsal Bilişim Uzmanlığı programı tercih döneminde seni bekliyor.";
+                hintArea.innerHTML = `🌟 **Büyük Başarı! Siber Dünyaya İlk Adımını Attın.**`;
+                
+                cmdInput.value = "BAŞARILI!";
+                cmdInput.disabled = true;
+            } else {
+                terminal.innerHTML += `<div class='error-text'>[SAVUNMA HATA] Güvenlik kuralları uygulanamadı. Lütfen 'firewall --block' yazın.</div>`;
+            }
+        }
+        
+        terminal.scrollTop = terminal.scrollHeight;
+    }
+</script>
+
+</body>
+</html>
